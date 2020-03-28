@@ -1,7 +1,5 @@
 package com.lekha.jokha.controller;
 
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,23 +22,34 @@ public class UserController {
 	@PostMapping(path = "/user/login")
 	public ResponseEntity loginUser(@Valid @RequestBody User user, BindingResult bindingResult) {
 
-		Map<String, String> loginStatus = userService.loginUser(user);
+		User loginUser = userService.loginUser(user);
 		
 		if (bindingResult.hasErrors()) {
-			return ResponseEntity.badRequest().body(userService.loginUser(user));
+			return ResponseEntity.badRequest().body(loginUser);
 		}
-
-		return ResponseEntity.status(Integer.valueOf(loginStatus.get("statusCode"))).body(loginStatus.get("statusMessage"));
+		
+		if(loginUser != null) {
+			return ResponseEntity.status(Integer.valueOf(200)).body(loginUser);
+		} else {
+			return ResponseEntity.status(Integer.valueOf(401)).body(loginUser);
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
 	@PostMapping(path = "/user/signup")
 	public ResponseEntity registerUser(@Valid @RequestBody User user, BindingResult bindingResult) {
 
+		User signUpUser = userService.registerUser(user);
+		
 		if (bindingResult.hasErrors()) {
-			return ResponseEntity.badRequest().body(userService.registerUser(user));
+			return ResponseEntity.badRequest().body(signUpUser);
+		}
+		
+		if(signUpUser != null) {
+			return ResponseEntity.status(Integer.valueOf(201)).body(signUpUser);
+		} else {
+			return ResponseEntity.status(Integer.valueOf(500)).body(signUpUser);
 		}
 
-		return ResponseEntity.status(201).body(userService.registerUser(user));
 	}
 }

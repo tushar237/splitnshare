@@ -1,9 +1,8 @@
 package com.lekha.jokha.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,9 @@ public class UserServiceImpl implements UserService {
 	UsersRepo usersRepo;
 
 	@Override
-	public Map<String, String> loginUser(User user) {
+	public User loginUser(User user) {
+
+		User loginUser = null;
 
 		com.lekha.jokha.entities.User userEntity = new com.lekha.jokha.entities.User();
 
@@ -26,31 +27,26 @@ public class UserServiceImpl implements UserService {
 		userEntity.setFullName(user.getFullName());
 		userEntity.setPassword(user.getPassword());
 		userEntity.setPhoneNo(user.getPhoneNo());
-
-		Map<String, String> response = new HashMap<String, String>();
-		String statusMessage = "";
-		String statusCode = "";
 
 		try {
 			Optional<com.lekha.jokha.entities.User> registeredUser = usersRepo.findById(userEntity.getEmail());
-			if (null != registeredUser.get() && user.getPassword().equalsIgnoreCase(registeredUser.get().getPassword())) {
-				statusMessage = "Login successful for User: " + registeredUser.get().getFullName().toUpperCase();
-				statusCode = "200";
-			} else {
-				statusMessage = "Login Failed. Invalid Login credentials. Try Again.";
-				statusCode = "401";
+			if (null != registeredUser.get()
+					&& user.getPassword().equalsIgnoreCase(registeredUser.get().getPassword())) {
+				loginUser = new User();
+				loginUser.setEmail(registeredUser.get().getEmail());
+				loginUser.setFullName(StringUtils.capitalize(registeredUser.get().getFullName()));
+				loginUser.setPhoneNo(registeredUser.get().getPhoneNo());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		response.put("statusCode", statusCode);
-		response.put("statusMessage", statusMessage);
-		return response;
+		return loginUser;
 	}
 
 	@Override
-	public Map<String, String> registerUser(User user) {
+	public User registerUser(User user) {
+
+		User signUpUser = null;
 
 		com.lekha.jokha.entities.User userEntity = new com.lekha.jokha.entities.User();
 		userEntity.setEmail(user.getEmail());
@@ -58,27 +54,19 @@ public class UserServiceImpl implements UserService {
 		userEntity.setPassword(user.getPassword());
 		userEntity.setPhoneNo(user.getPhoneNo());
 
-		Map<String, String> response = new HashMap<String, String>();
-		String statusMessage = "";
-		String statusCode = "";
-		
 		try {
 			com.lekha.jokha.entities.User registeredUser = usersRepo.save(userEntity);
 			if (null != registeredUser) {
-				statusMessage = "Registration is successful for User: " + registeredUser.getFullName();
-				statusCode = "201";
-			} else {
-				statusMessage = "Registartion Failed";
-				statusCode = "422";
+				signUpUser = new User();
+				signUpUser.setEmail(registeredUser.getEmail());
+				signUpUser.setFullName(StringUtils.capitalize(registeredUser.getFullName()));
+				signUpUser.setPhoneNo(registeredUser.getPhoneNo());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		response.put("statusCode", statusCode);
-		response.put("statusMessage", statusMessage);
 
-		return response;
+		return signUpUser;
 	}
 
 }
